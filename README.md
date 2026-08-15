@@ -1,102 +1,336 @@
-# Social Media Feed Application
+# 🚀 Social Media Feed App
 
-**Mani Bhushan** | B.Tech CSE, ITER, Siksha 'O' Anusandhan University (2024–2028)
+A full-stack **real-time social media feed application** — users can create and interact with posts while receiving **live updates across multiple connected users, without refreshing the page.**
 
-Week 4 capstone project (MERN Internship): a full-stack social feed
-with user auth, posts (text + optional image), likes, comments, and
-**live real-time updates via Socket.io** — no page refresh needed to
-see new posts, likes, or comments from other users.
+> 💡 **Create. Share. Like. Comment. Connect. — All in real time. ⚡**
 
-## Structure
+---
 
-```
-social-media-feed-app/
-├── backend/     Express + MongoDB + JWT auth + Multer + Socket.io
-├── frontend/    React + Vite + React Router + Socket.io client
-└── docs/screenshots/
-```
+## 👨‍💻 Developer
 
-## Features
+**Mani Bhushan**
+B.Tech Computer Science & Engineering
+ITER, Siksha 'O' Anusandhan University
+2024–2028
 
-- User registration & login (JWT, bcrypt-hashed passwords)
-- Create posts with optional image upload (Multer)
+---
+
+## 🔗 Live Demo
+
+**App:** [https://social-media-feed-app-theta.vercel.app/]
+
+> The backend is a REST + Socket.io API with no browser UI of its own (it just returns a JSON health check at its root) — the link above is the actual app to visit and use.
+
+---
+
+## ✨ Features
+
+### 🔐 Authentication & Security
+
+- User registration and login
+- JWT-based authentication
+- Password hashing using bcrypt
+- Protected routes for authenticated users
+- Role-based admin authorization
+- User-specific authorization for posts and comments
+
+### 📝 Social Feed
+
+- Create text-based posts
+- Upload optional images with posts (stored on Cloudinary)
+- View posts in a live, shared feed
+- Delete your own posts
+- Admins can delete **any** post (moderation)
+
+### ❤️ Post Interactions
+
 - Like / unlike posts
+- Real-time like count updates
 - Comment on posts
-- **Real-time feed**: new posts, likes, and comments appear instantly
-  in every open browser tab — no polling, no refresh
+- Real-time comment updates
 
-## How the real-time layer works
+### ⚡ Real-Time Updates
 
-Two channels run side by side on the same backend server:
+One of the main highlights of this project is its **real-time functionality using Socket.io**.
 
-1. **REST API** — normal request/response: login, create a post, like a post, etc.
-2. **Socket.io** — a persistent connection used only to *broadcast* that
-   something changed. When a post is created via the REST endpoint, the
-   server also emits a `newPost` event; every connected browser tab is
-   listening for that event and updates its feed immediately.
+When one user performs an action, every other connected user sees the change immediately — no refresh required.
 
-The initial feed always loads via a REST `GET /api/posts` request
-(sockets have no history — they only deliver events that happen while
-connected). From that point forward, socket events keep everyone's
-view in sync.
+Real-time updates include:
 
-**Events used:** `newPost`, `postDeleted`, `postLiked`, `newComment`, `commentDeleted`
+- 🆕 New posts
+- ❤️ Likes / unlikes
+- 💬 New comments
+- 🗑️ Deleted posts
 
-## Backend
+---
 
-### Endpoints
-| Method | Route                          | Auth | Description                     |
-|--------|--------------------------------|------|-----------------------------------|
-| POST   | `/api/auth/register`           | No   | Create account                    |
-| POST   | `/api/auth/login`              | No   | Log in, get a JWT                 |
-| GET    | `/api/posts`                   | No   | Get the full feed                 |
-| POST   | `/api/posts`                   | Yes  | Create a post (text + optional image) |
-| DELETE | `/api/posts/:id`               | Yes  | Delete your own post              |
-| POST   | `/api/posts/:id/like`          | Yes  | Toggle like on a post             |
-| GET    | `/api/posts/:postId/comments`  | No   | Get a post's comments             |
-| POST   | `/api/posts/:postId/comments`  | Yes  | Add a comment                     |
-| DELETE | `/api/comments/:id`            | Yes  | Delete your own comment           |
+## 🧠 How It Works
 
-### Run it
+The application runs two communication layers side by side:
+
+### 1️⃣ REST API
+
+Handles normal request/response operations:
+
+```text
+Login · Register · Create Post · Delete Post
+Like Post · Create Comment · Fetch Feed
+```
+
+### 2️⃣ Socket.io
+
+Handles **broadcasting**. After the backend successfully processes an action via REST, it emits an event to every connected client — so users see what others are doing without polling or refreshing.
+
+```text
+User A
+   │ Creates a post
+   ▼
+REST API → Backend → Socket.io broadcast
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        ▼                     ▼                     ▼
+   User B sees it        User C sees it        User D sees it
+      instantly              instantly              instantly
+```
+
+---
+
+## 🏗️ Project Architecture
+
+```text
+                    ┌─────────────────────┐
+                    │      React App      │
+                    │      Frontend       │
+                    └──────────┬──────────┘
+                               │
+                    REST API + Socket.io
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │    Node + Express   │
+                    │      Backend        │
+                    └──────────┬──────────┘
+                               │
+                    ┌──────────┴──────────┐
+                    ▼                     ▼
+          ┌─────────────────┐   ┌─────────────────┐
+          │     MongoDB     │   │    Cloudinary   │
+          │     Database    │   │  Image Storage  │
+          └─────────────────┘   └─────────────────┘
+```
+
+---
+
+## 📁 Project Structure
+
+```text
+social-media-feed-app/
+│
+├── backend/
+│   ├── controllers/
+│   ├── middleware/       # auth, admin, upload
+│   ├── models/
+│   ├── routes/
+│   ├── sockets/
+│   ├── uploads/
+│   ├── cloudinary.js
+│   ├── server.js
+│   ├── package.json
+│   └── .env.example
+│
+├── frontend/
+│   ├── src/
+│   │   ├── api/
+│   │   ├── components/
+│   │   ├── context/      # AuthContext, SocketContext
+│   │   ├── pages/
+│   │   ├── App.jsx
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── package.json
+│   ├── vercel.json
+│   ├── vite.config.js
+│   └── .env.example
+│
+└── docs/
+    └── screenshots/
+```
+
+---
+
+## 🛠️ Tech Stack
+
+**Frontend:** React · Vite · React Router · Socket.io Client · Axios
+
+**Backend:** Node.js · Express.js · MongoDB · Mongoose · JWT · bcryptjs · Socket.io · Multer · Cloudinary
+
+**Deployment:** Vercel (frontend) · Render (backend) · MongoDB Atlas (database) · Cloudinary (image storage)
+
+---
+
+## 🔌 API Endpoints
+
+| Method | Route | Auth | Description |
+|---|---|---|---|
+| POST | `/api/auth/register` | ❌ | Create a new account |
+| POST | `/api/auth/login` | ❌ | Login and receive a JWT |
+| GET | `/api/posts` | ❌ | Fetch the feed |
+| POST | `/api/posts` | ✅ | Create a post |
+| DELETE | `/api/posts/:id` | ✅ | Delete a post (own post, or any post if admin) |
+| POST | `/api/posts/:id/like` | ✅ | Like / unlike a post |
+| GET | `/api/posts/:postId/comments` | ❌ | Fetch comments |
+| POST | `/api/posts/:postId/comments` | ✅ | Add a comment |
+
+---
+
+## 🧪 Testing Real-Time Features
+
+Postman can't show you a live broadcast — you need two browser tabs:
+
+1. Open the app in two browser tabs (or one regular + one incognito)
+2. Log in with two **different** accounts
+3. Create a post from **Browser A**
+4. Watch **Browser B** — the post appears automatically, no refresh
+5. Try liking or commenting from either tab — changes reflect live in both
+
+---
+
+## 🚀 Running the Project Locally
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/manibhushan47075/social-media-feed-app.git
+cd social-media-feed-app
+```
+
+### 2. Start the backend
+
 ```bash
 cd backend
 npm install
-cp .env.example .env    # set MONGO_URI and JWT_SECRET
+cp .env.example .env   # fill in your own values
 npm run dev
 ```
-Runs on `http://localhost:5040`. Test the REST endpoints with
-`backend/postman_collection.json` (real-time events aren't visible in
-Postman — see "Testing the real-time layer" below).
+Runs on `http://localhost:5040`
 
-## Frontend
+### 3. Start the frontend
 
-### Run it
 ```bash
 cd frontend
 npm install
 cp .env.example .env
 npm run dev
 ```
-Runs on `http://localhost:5176`.
+Runs on `http://localhost:5176`
 
-## Testing the real-time layer
+---
 
-Postman can't show you a broadcast — you need two browser tabs:
+## 🔑 Environment Variables
 
-1. Open the app in two separate tabs (or one normal + one incognito),
-   log in as two different users (register a second test account)
-2. Post something from Tab A → it should appear instantly in Tab B,
-   no refresh
-3. Like a post from Tab B → the like count updates instantly in Tab A
-4. Comment from either tab → appears live in both
+Kept out of the repository for security — see each `.env.example` for the full list.
 
-## Deployment
+**Backend**
+```env
+PORT=
+MONGO_URI=
+JWT_SECRET=
+CLIENT_URL=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
 
-- **Database:** MongoDB Atlas (reuse the free cluster from Weeks 2–3; just add a new database, e.g. `social-media-feed-app`)
-- **Backend:** [Render](https://render.com) — connect the GitHub repo, set the root directory to `backend`, add the same env vars from `.env.example` in Render's dashboard, set `CLIENT_URL` to your deployed frontend's URL
-- **Frontend:** [Vercel](https://vercel.com) — connect the GitHub repo, set the root directory to `frontend`, set `VITE_API_URL` and `VITE_SOCKET_URL` to your deployed Render backend URL (not localhost)
-- **CORS:** the backend's `CLIENT_URL` env var must exactly match your deployed frontend's URL, or the browser will block requests
+**Frontend**
+```env
+VITE_API_URL=
+VITE_SOCKET_URL=
+```
 
-## Built with
+> ⚠️ Never commit your actual `.env` files or secret keys to GitHub.
 
-Node.js · Express · MongoDB · Mongoose · bcryptjs · jsonwebtoken · Multer · Socket.io · React 18 · Vite · React Router · Axios · Socket.io Client
+---
+
+## 🌐 Deployment Architecture
+
+```text
+                         GitHub
+                           │
+                ┌──────────┴──────────┐
+                ▼                     ▼
+             Vercel                 Render
+            (Frontend)             (Backend)
+                │                     │
+                └──────────┬──────────┘
+                           ▼
+                     MongoDB Atlas
+                       (Database)
+                           │
+                           ▼
+                       Cloudinary
+                     (Image Storage)
+```
+
+---
+
+## 🔐 Security
+
+- JWT authentication on every protected route
+- Passwords hashed with bcrypt — never stored in plain text
+- Role-based admin authorization for moderation
+- User-scoped authorization (you can only edit/delete your own content, unless you're an admin)
+- CORS locked to the deployed frontend's origin
+- Secrets kept in environment variables, never committed
+
+---
+
+## 🎯 Project Highlights
+
+What makes this more than a basic CRUD app:
+
+- **Real-time social feed** — posts, likes, and comments sync live across every connected user via Socket.io
+- **Cloud image storage** — uploads go straight to Cloudinary, so they survive redeploys (unlike local disk storage on ephemeral hosts)
+- **Admin moderation** — a role-based system for removing inappropriate posts beyond just "your own content"
+- **Full deployment pipeline** — live on Vercel + Render + Atlas + Cloudinary, not just running locally
+
+---
+
+## 📚 What I Learned
+
+- Full-stack MERN application development end to end
+- REST API design and JWT authentication
+- Real-time communication with Socket.io
+- MongoDB/Mongoose schema design, including relationships and role-based fields
+- React component architecture, Context API (Auth + Socket), and React Router
+- File/image upload handling and cloud storage integration
+- CORS configuration across separate frontend/backend deployments
+- Environment variable management across dev and production
+- Debugging real production issues (DNS/Atlas connectivity, ephemeral filesystems)
+- Git and GitHub workflow across a multi-stage project
+
+---
+
+## 🚧 Future Improvements
+
+- 🗑️ Delete comments
+- 🔔 Notification system
+- 👤 User profile pages
+- 👥 Follow / unfollow users
+- 🔎 Search functionality
+- 🌓 Dark / light theme toggle
+- ✏️ Edit posts
+- 🖼️ Multiple image uploads per post
+- 📱 Improved mobile responsiveness
+- 📩 Direct messaging
+
+---
+
+## ⭐ Support
+
+If you find this project interesting, consider giving the repository a ⭐ on GitHub!
+
+---
+
+## 📌 Project Status
+
+🟢 **Active — Deployed & Functional**
